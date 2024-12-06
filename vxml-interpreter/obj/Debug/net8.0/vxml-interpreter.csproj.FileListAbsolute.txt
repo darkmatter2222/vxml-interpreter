@@ -1,0 +1,14 @@
+O:\source\repos\vxml-interpreter\vxml-interpreter\bin\Debug\net8.0\vxml-interpreter.exe
+O:\source\repos\vxml-interpreter\vxml-interpreter\bin\Debug\net8.0\vxml-interpreter.deps.json
+O:\source\repos\vxml-interpreter\vxml-interpreter\bin\Debug\net8.0\vxml-interpreter.runtimeconfig.json
+O:\source\repos\vxml-interpreter\vxml-interpreter\bin\Debug\net8.0\vxml-interpreter.dll
+O:\source\repos\vxml-interpreter\vxml-interpreter\bin\Debug\net8.0\vxml-interpreter.pdb
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.GeneratedMSBuildEditorConfig.editorconfig
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.AssemblyInfoInputs.cache
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.AssemblyInfo.cs
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.csproj.CoreCompileInputs.cache
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.dll
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\refint\vxml-interpreter.dll
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.pdb
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\vxml-interpreter.genruntimeconfig.cache
+O:\source\repos\vxml-interpreter\vxml-interpreter\obj\Debug\net8.0\ref\vxml-interpreter.dll
