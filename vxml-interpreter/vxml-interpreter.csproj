@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+	<StartupObject>VxmlInterpreter.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
 		<Compile Include="src\*.cs" />
@@ -18,6 +19,11 @@
 	  <Compile Include="src\Speech\**\*.cs" />
 	  <Compile Include="src\Handlers\**\*.cs" />
 	  <Compile Include="src\Resources\**\*.cs" />
+	  <Compile Include="tests\IntegrationTests\BasicIntegrationTest.cs" />
+	  <Compile Include="tests\UnitTests\InterpreterTests.cs" />
+	    <PackageReference Include="NUnit" Version="3.13.3" />
+  <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
 </ItemGroup>
   <ItemGroup>
     <Folder Include="src\Audio\" />

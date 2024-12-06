@@ -1,13 +1,10 @@
 ﻿using System;
+using System.Linq;
 using VxmlInterpreter.Core;
-// Future using directives:
-// using VxmlInterpreter.Parsing;
-// using VxmlInterpreter.Model;
-// using VxmlInterpreter.Execution;
-// using VxmlInterpreter.Speech;
-// using VxmlInterpreter.Audio;
-// using VxmlInterpreter.Resources;
-// using VxmlInterpreter.Handlers;
+using VxmlInterpreter.Model;
+using VxmlInterpreter.Model.Dialogs;
+using VxmlInterpreter.Parsing;
+using VxmlInterpreter.Execution;
 
 namespace VxmlInterpreter.Core
 {
@@ -16,30 +13,22 @@ namespace VxmlInterpreter.Core
     /// It:
     /// - Loads and validates VXML documents.
     /// - Manages interpreter state transitions.
-    /// - Executes dialogs and form interpretation algorithms.
+    /// - Executes dialogs and the form interpretation algorithm.
     /// - Handles events (noinput, nomatch, help, disconnect, etc.) as specified by VoiceXML 2.1.
-    /// - Integrates with audio (TTS, audio playback) and speech recognition (ASR/DTMF).
-    /// - Avoids throwing exceptions for control flow; uses StatusCode and internal state to handle errors.
+    /// - Integrates with audio (TTS, audio playback), speech recognition (ASR), and resources.
     /// 
-    /// Over time, we will fully implement all methods to achieve 100% VoiceXML 2.1 compliance.
+    /// Uses StatusCode instead of exceptions for error handling.
     /// </summary>
     public class Interpreter
     {
         private InterpreterState _state;
         private StatusCode _lastStatus;
+        private VxmlDocument _currentDocument;
 
-        // The current VoiceXML document model.
-        // Will be set after parsing and validation.
-        // private VxmlDocument _currentDocument; // We'll define this type later in Model.
-
-        // Keep track of the current dialog we are executing, etc.
-        // private VxmlDialog _currentDialog; // To be defined.
-
-        // Platform/Environment interfaces for ASR, TTS, telephony, etc.
-        // private IPlatformInterface _platform; // Will define interfaces for platform abstraction later.
-
-        // Configuration flags, properties, variables, etc.
-        // private Dictionary<string, object> _variables;
+        // Keep track of the current dialog index.
+        private int _currentDialogIndex = -1;
+        private VxmlDialog _currentDialog;
+        private FormInterpreter _formInterpreter; // For form dialogs only, as an example.
 
         public Interpreter()
         {
@@ -49,120 +38,183 @@ namespace VxmlInterpreter.Core
 
         /// <summary>
         /// Load a VoiceXML document from a given URI.
-        /// This includes:
-        /// - Fetching the document (local file, HTTP URL, etc.)
-        /// - Parsing and validating it against VoiceXML 2.1 rules
-        /// - Initializing internal structures
-        /// 
-        /// Returns a StatusCode indicating success or the type of error.
+        /// Steps:
+        /// 1. Parse the VXML document using VxmlParser.
+        /// 2. On success, store the document and move to Initializing state.
+        /// On failure, go to Error state and return the error code.
         /// </summary>
-        /// <param name="documentUri">URI of the VoiceXML document</param>
         public StatusCode LoadDocument(string documentUri)
         {
             if (_state != InterpreterState.Idle && _state != InterpreterState.Complete)
             {
-                return StatusCode.InvalidState;
+                _lastStatus = StatusCode.InvalidState;
+                return _lastStatus;
             }
 
             _state = InterpreterState.Loading;
 
-            // TODO:
-            // 1. Fetch the VXML document from the URI.
-            // 2. Parse the VXML document into an internal model using a VxmlParser.
-            // 3. Validate the document fully against the VXML 2.1 specification.
-            // 4. If any errors occur, set _state = InterpreterState.Error and return the appropriate StatusCode.
-            // 5. On success, transition to InterpreterState.Initializing.
-
-            // Placeholder:
-            bool dummySuccess = false; // Replace with actual logic
-            if (!dummySuccess)
+            var parser = new VxmlParser();
+            var parseStatus = parser.Parse(documentUri, out object docObj);
+            if (parseStatus != StatusCode.Success)
             {
                 _state = InterpreterState.Error;
-                return StatusCode.DocumentNotFound;
+                _lastStatus = parseStatus;
+                return _lastStatus;
             }
 
-            // If successful:
+            if (!(docObj is VxmlDocument vxmlDoc))
+            {
+                _state = InterpreterState.Error;
+                _lastStatus = StatusCode.InternalError;
+                return _lastStatus;
+            }
+
+            // Store the loaded document
+            _currentDocument = vxmlDoc;
             _state = InterpreterState.Initializing;
-            return StatusCode.Success;
+            _lastStatus = StatusCode.Success;
+            return _lastStatus;
         }
 
         /// <summary>
-        /// Initialize the interpreter after the document has been loaded and validated.
-        /// This might involve:
-        /// - Setting initial dialogs
-        /// - Initializing variables, properties, and scripts
-        /// - Preparing grammars, etc.
-        /// 
-        /// Returns StatusCode indicating success or failure.
+        /// Initialize the interpreter after the document has been loaded.
+        /// Checks that the document has at least one dialog.
+        /// Sets up the initial dialog as current.
         /// </summary>
         public StatusCode Initialize()
         {
             if (_state != InterpreterState.Initializing)
             {
-                return StatusCode.InvalidState;
+                _lastStatus = StatusCode.InvalidState;
+                return _lastStatus;
             }
 
-            // TODO:
-            // Implement initialization logic.
-            // If initialization fails, set state to Error and return an error code.
+            var dialogs = _currentDocument.GetDialogs();
+            if (dialogs == null || dialogs.Count == 0)
+            {
+                _state = InterpreterState.Error;
+                _lastStatus = StatusCode.NoMoreDialogs;
+                return _lastStatus;
+            }
 
-            // On success:
+            // Assume the first dialog for now
+            _currentDialogIndex = 0;
+            _currentDialog = dialogs[0] as VxmlDialog;
+            if (_currentDialog == null)
+            {
+                _state = InterpreterState.Error;
+                _lastStatus = StatusCode.InternalError;
+                return _lastStatus;
+            }
+
+            // Start the dialog (e.g., reset fields, prepare prompts)
+            var startStatus = _currentDialog.StartDialog();
+            if (startStatus != StatusCode.Success)
+            {
+                _state = InterpreterState.Error;
+                _lastStatus = startStatus;
+                return _lastStatus;
+            }
+
             _state = InterpreterState.DialogActive;
-            return StatusCode.Success;
+            _lastStatus = StatusCode.Success;
+            return _lastStatus;
         }
 
         /// <summary>
-        /// Execute the main interpretation loop. This could be driven by external events (ASR results, user input)
-        /// or timer-based (like noinput timeouts). Since this is a synchronous method for now,
-        /// we assume external calls feed it data.
+        /// Run the interpreter. This method executes the currently active dialog(s) until:
+        /// - The dialogs are complete
+        /// - Or an event causes the application to exit
         /// 
-        /// Eventually, this will:
-        /// - Present prompts
-        /// - Listen for input
-        /// - Fill fields
-        /// - Handle events
-        /// - Transition between dialogs
-        /// - End when application says to exit.
-        /// 
-        /// Returns StatusCode indicating the end state of interpretation (Success, ExitRequested, UserHangup, etc.).
+        /// For forms, it uses the FormInterpreter. For menus, we would implement menu logic similarly.
+        /// Currently, this is a simplified synchronous approach.
+        /// A real interpreter might have an event loop or async handling.
         /// </summary>
         public StatusCode Run()
         {
             if (_state != InterpreterState.DialogActive && _state != InterpreterState.Transitioning)
             {
-                return StatusCode.InvalidState;
+                _lastStatus = StatusCode.InvalidState;
+                return _lastStatus;
             }
 
-            // TODO:
-            // Implement the form interpretation algorithm and dialog event loops as per VXML 2.1.
-            // This will be a complex method, eventually decomposed into smaller steps.
-            // For now, we just return that we've completed execution, as a placeholder.
+            // In a real scenario, we’d have a loop here that waits for user input, processes events,
+            // and transitions between dialogs until the application ends or the document completes.
 
-            _state = InterpreterState.Complete;
-            return StatusCode.Success;
+            // For demonstration, let’s check what type of dialog we have:
+            if (_currentDialog is VxmlForm form)
+            {
+                _formInterpreter = new FormInterpreter(form);
+                var initStatus = _formInterpreter.InitializeForm();
+                if (initStatus != StatusCode.Success)
+                {
+                    _state = InterpreterState.Error;
+                    _lastStatus = initStatus;
+                    return _lastStatus;
+                }
+
+                // Simulate a basic interpretation loop until the form completes.
+                // In a real system, we would prompt, wait for input, handle events, etc.
+                // For now, just assume no user interaction and the form somehow completes.
+                while (!_formInterpreter.IsFormComplete())
+                {
+                    // StepInterpretation would prompt the user, wait for input, handle events.
+                    // Here, just call StepInterpretation once as a placeholder.
+                    var stepStatus = _formInterpreter.StepInterpretation();
+                    if (stepStatus != StatusCode.Success)
+                    {
+                        // If an error occurs during interpretation
+                        _state = InterpreterState.Error;
+                        _lastStatus = stepStatus;
+                        return _lastStatus;
+                    }
+
+                    // Since we have a placeholder form, let’s break out to avoid infinite loop.
+                    break;
+                }
+
+                // Once the form is complete, we would move on to the next dialog or end.
+                // If no more dialogs, we complete.
+                _state = InterpreterState.Complete;
+                _lastStatus = StatusCode.Success;
+                return _lastStatus;
+            }
+            else if (_currentDialog is VxmlMenu menu)
+            {
+                // Placeholder for menu logic.
+                // Similar to form logic, but we’d wait for a user choice and then navigate.
+                // For now, just mark it complete.
+                _state = InterpreterState.Complete;
+                _lastStatus = StatusCode.Success;
+                return _lastStatus;
+            }
+            else
+            {
+                // Unknown dialog type or not implemented
+                _state = InterpreterState.Error;
+                _lastStatus = StatusCode.UnsupportedFeature;
+                return _lastStatus;
+            }
         }
 
         /// <summary>
-        /// Handle a user or platform event, such as a noinput, nomatch, help request,
-        /// disconnect, or speech recognition result. This method will be called whenever 
-        /// an event occurs that the interpreter needs to react to.
+        /// Handle a user or platform event. In a full implementation, 
+        /// this would route the event to the appropriate event handlers.
         /// </summary>
-        /// <param name="eventName">The name of the event (e.g. "noinput", "nomatch")</param>
-        /// <param name="eventData">Additional data relevant to the event</param>
         public StatusCode HandleEvent(string eventName, object eventData = null)
         {
-            // TODO:
-            // Implement event handling logic per VoiceXML 2.1.
-            // Use the event hierarchy: check if the current field has a catch, 
-            // then the form, then the application root.
-            // Trigger appropriate transitions or prompts.
-
-            // Placeholder: return success for now
-            return StatusCode.Success;
+            // Currently a placeholder, just return Success.
+            // A full implementation would:
+            // - Consult the current field’s event handlers, then dialog’s, then document’s.
+            // - Execute any event actions, possibly altering the dialog state.
+            // - Return the appropriate StatusCode.
+            _lastStatus = StatusCode.Success;
+            return _lastStatus;
         }
 
         /// <summary>
-        /// Check if the interpreter has completed execution.
+        /// Checks if the interpreter has completed execution of the entire VoiceXML application.
+        /// Completion can occur if no more dialogs remain or if an exit/exit event occurred.
         /// </summary>
         public bool IsComplete()
         {

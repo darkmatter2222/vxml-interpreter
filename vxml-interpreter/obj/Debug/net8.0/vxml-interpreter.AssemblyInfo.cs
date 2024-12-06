@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("vxml-interpreter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07bfcb8a4f52859b51318e14c7e240bb54d1743b")]
 [assembly: System.Reflection.AssemblyProductAttribute("vxml-interpreter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("vxml-interpreter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
