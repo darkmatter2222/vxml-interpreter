@@ -5,9 +5,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "bugfix/ci" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "bugfix/ci" ]
 
 jobs:
   build:
@@ -23,8 +23,8 @@ jobs:
           8.0.x
           9.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: cd vxml-interpreter && dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: cd vxml-interpreter && dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: cd vxml-interpreter && dotnet test --no-build --verbosity normal
