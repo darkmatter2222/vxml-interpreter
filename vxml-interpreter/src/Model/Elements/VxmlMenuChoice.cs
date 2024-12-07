@@ -20,13 +20,13 @@ namespace VxmlInterpreter.Model.Elements
         /// <summary>
         /// An identifier for this choice, which could be DTMF digits or a name.
         /// </summary>
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>
         /// The URI or dialog ID to jump to if this choice is selected.
         /// This could be another form’s ID or a different VoiceXML document.
         /// </summary>
-        public string NextUri { get; set; }
+        public string? NextUri { get; set; }
 
         /// <summary>
         /// Indicates whether this choice has been selected by the user.

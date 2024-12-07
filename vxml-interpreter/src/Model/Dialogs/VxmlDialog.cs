@@ -23,7 +23,7 @@ namespace VxmlInterpreter.Model.Dialogs
         /// <summary>
         /// The unique identifier of the dialog, typically set by the 'id' attribute in VoiceXML.
         /// </summary>
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>
         /// Initialize the dialog, preparing it for interaction.

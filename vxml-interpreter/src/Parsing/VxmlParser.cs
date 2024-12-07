@@ -22,7 +22,7 @@ namespace VxmlInterpreter.Parsing
         /// - Parse dialogs (forms, menus).
         /// - Return a fully constructed VxmlDocument.
         /// </summary>
-        public StatusCode Parse(string documentUri, out object vxmlDocument)
+        public StatusCode Parse(string documentUri, out object? vxmlDocument)
         {
             vxmlDocument = null;
 
