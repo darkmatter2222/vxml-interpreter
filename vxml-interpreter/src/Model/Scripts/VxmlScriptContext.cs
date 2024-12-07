@@ -43,7 +43,7 @@ namespace VxmlInterpreter.Model.Scripts
         /// <summary>
         /// Gets the value of a variable. Returns null if not found.
         /// </summary>
-        public object GetVariable(string name)
+        public object? GetVariable(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return null;
@@ -56,7 +56,7 @@ namespace VxmlInterpreter.Model.Scripts
         /// Evaluates an expression. In a full implementation, this would invoke the ECMAScript engine.
         /// For now, we return a placeholder or only handle trivial cases.
         /// </summary>
-        public (StatusCode, object) EvaluateExpression(string expression)
+        public (StatusCode, object?) EvaluateExpression(string expression)
         {
             // TODO: Integrate with a real scripting engine.
             // As a placeholder, just return the expression itself.

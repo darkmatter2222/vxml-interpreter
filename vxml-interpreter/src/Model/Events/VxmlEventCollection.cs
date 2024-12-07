@@ -40,7 +40,7 @@ namespace VxmlInterpreter.Model.Events
         /// <summary>
         /// Gets the event handler for a given event name, or null if none is defined.
         /// </summary>
-        public VxmlEventHandler GetEventHandler(string eventName)
+        public VxmlEventHandler? GetEventHandler(string eventName)
         {
             if (string.IsNullOrWhiteSpace(eventName))
                 return null;

@@ -10,7 +10,7 @@ namespace VxmlInterpreter.Tests.IntegrationTests
         // This test assumes that you have a simple VoiceXML document available at a known path.
         // In a real scenario, we would create a temporary file before the test, or use a resource
         // embedded in the test assembly.
-        private string _tempVxmlPath;
+        private string? _tempVxmlPath;
 
         [SetUp]
         public void Setup()
@@ -54,7 +54,7 @@ namespace VxmlInterpreter.Tests.IntegrationTests
         public void Interpreter_LoadAndRunSimpleVxml_ShouldComplete()
         {
             var interpreter = new Interpreter();
-            var status = interpreter.LoadDocument(_tempVxmlPath);
+            var status = interpreter.LoadDocument(_tempVxmlPath ?? throw new FileNotFoundException());
             Assert.AreEqual(StatusCode.Success, status, "Loading a simple VXML document should succeed.");
 
             status = interpreter.Initialize();

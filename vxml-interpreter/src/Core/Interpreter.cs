@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using VxmlInterpreter.Core;
 using VxmlInterpreter.Model;
@@ -23,12 +24,14 @@ namespace VxmlInterpreter.Core
     {
         private InterpreterState _state;
         private StatusCode _lastStatus;
-        private VxmlDocument _currentDocument;
+        private VxmlDocument? _currentDocument;
 
         // Keep track of the current dialog index.
+#pragma warning disable CS0414 // Field is assigned but its value is never used
         private int _currentDialogIndex = -1;
-        private VxmlDialog _currentDialog;
-        private FormInterpreter _formInterpreter; // For form dialogs only, as an example.
+#pragma warning restore CS0414 // Field is assigned but its value is never used
+        private VxmlDialog? _currentDialog;
+        private FormInterpreter? _formInterpreter; // For form dialogs only, as an example.
 
         public Interpreter()
         {
@@ -54,7 +57,7 @@ namespace VxmlInterpreter.Core
             _state = InterpreterState.Loading;
 
             var parser = new VxmlParser();
-            var parseStatus = parser.Parse(documentUri, out object docObj);
+            var parseStatus = parser.Parse(documentUri, out object? docObj);
             if (parseStatus != StatusCode.Success)
             {
                 _state = InterpreterState.Error;
@@ -89,6 +92,7 @@ namespace VxmlInterpreter.Core
                 return _lastStatus;
             }
 
+            Debug.Assert(_currentDocument != null, nameof(_currentDocument) + " != null");
             var dialogs = _currentDocument.GetDialogs();
             if (dialogs == null || dialogs.Count == 0)
             {
@@ -201,7 +205,7 @@ namespace VxmlInterpreter.Core
         /// Handle a user or platform event. In a full implementation, 
         /// this would route the event to the appropriate event handlers.
         /// </summary>
-        public StatusCode HandleEvent(string eventName, object eventData = null)
+        public StatusCode HandleEvent(string eventName, object? eventData = null)
         {
             // Currently a placeholder, just return Success.
             // A full implementation would:

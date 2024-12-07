@@ -23,12 +23,12 @@ namespace VxmlInterpreter.Model.Elements
         /// The name of this field, corresponding to a variable where the user's 
         /// input will be stored.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// The current value of this field once filled. Initially empty.
         /// </summary>
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <summary>
         /// Indicates whether this field has been successfully filled.
